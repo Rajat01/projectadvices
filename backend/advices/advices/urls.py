@@ -23,8 +23,11 @@ from advicesv1 import views
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    url(r'^api/getQuestionList', views.question_list)
-
+    url(r'^api/getQuestionList', views.get_question_list),
+    url(r'^api/createQuestion', views.create_question),
+    url(r'^api/createAdvice', views.create_advice),
+    url(r'^api/getAllAdvices/(?P<pk>[0-9]+)', views.get_all_advices),
+    url(r'^docs/', include('rest_framework_docs.urls')),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
