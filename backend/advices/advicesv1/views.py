@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.parsers import JSONParser
 from models import Questions, Advices
 from serializers import QuestionSerializer, AdviceSerializer
-from django.db.models import Count
+from django.db.models import F
 
 
 
@@ -32,6 +32,17 @@ def get_question_list(request, format=None):
         return Response(serializer.data)
 
 
+@api_view(['POST'])
+def update_question_upvote_count(request, format=None):
+
+    if request.method == 'POST':
+        request_data = request.data
+        question_id = request_data.get('id')
+        question_obj = Questions.objects.filter(pk=question_id)
+        question_obj.update(up_votes=F('up_votes') + 1)
+        serializer = QuestionSerializer(question_obj, many=True)
+        return Response(serializer.data)
+
 
 @api_view(['GET'])
 def get_all_advices(request, pk, format=None):
@@ -55,6 +66,15 @@ def create_advice(request, format=None):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['DELETE'])
+def delete_advice_question(request, pk):
+
+    if request.method == 'DELETE':
+        advice_to_delete = Advices.objects.get(pk=pk)
+        advice_to_delete.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 
 
 @api_view(['GET', 'POST'])
@@ -63,11 +83,6 @@ def advices_info(request, format=None):
 
 
 
-@api_view(['POST'])
-def update_question_upvote_count(request, pk, format=None):
-
-    if request.method == 'POST':
-        upvote_count = Questions
 
 
 
