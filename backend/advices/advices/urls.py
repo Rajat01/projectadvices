@@ -29,7 +29,8 @@ urlpatterns = [
     url(r'^api/getAllAdvices/(?P<pk>[0-9]+)', views.get_all_advices),
     url(r'^docs/', include('rest_framework_docs.urls')),
     url(r'^api/deleteAdvice/(?P<pk>[0-9]+)', views.delete_advice_question),
-    url(r'^api/updateQuestionUpvotes', views.update_question_upvote_count)
+    url(r'^api/updateQuestionUpvotes', views.update_question_upvote_count),
+    url(r'^api/deleteQuestion/(?P<pk>[0-9]+)', views.delete_question)
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

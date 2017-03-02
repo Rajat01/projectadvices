@@ -5,6 +5,7 @@ from rest_framework.parsers import JSONParser
 from models import Questions, Advices
 from serializers import QuestionSerializer, AdviceSerializer
 from django.db.models import F
+import json
 
 
 
@@ -42,6 +43,22 @@ def update_question_upvote_count(request, format=None):
         question_obj.update(up_votes=F('up_votes') + 1)
         serializer = QuestionSerializer(question_obj, many=True)
         return Response(serializer.data)
+
+@api_view(['DELETE'])
+def delete_question(request, pk, format=None):
+    resp_dict = {}
+    resp_dict['msg'] = 'Question does not exist'
+    if request.method == 'DELETE':
+        advices_related_to_ques = Advices.objects.filter(question_id=pk)
+        if advices_related_to_ques:
+            advices_related_to_ques.delete()
+        try:
+            question_to_delete = Questions.objects.get(pk=pk)
+            question_to_delete.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except:
+            return Response(json.dumps(resp_dict))
+
 
 
 @api_view(['GET'])

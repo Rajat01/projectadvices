@@ -30,8 +30,6 @@ class Advices(models.Model):
 
 
 
-
-
 class Stories(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     story_content = models.CharField(max_length=500)
