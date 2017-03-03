@@ -115,4 +115,3 @@ def delete_advice_question(request, pk):
 def advices_info(request, format=None):
     pass
 
-# Create your views here.
