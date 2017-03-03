@@ -4,8 +4,7 @@ from rest_framework.response import Response
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from rest_framework.authtoken.models import Token
-
-
+from rest_framework.decorators import permission_classes
 
 '''This contains all auth related apis'''
 
@@ -37,7 +36,9 @@ def login_user(request):
     user = authenticate(username=username, password=password)
     if user is not None:
         login(request, user)
-        resp_dict['access_token'] = request.auth
+        token = Token.objects.get(user=user)
+        #print "login_user api error {0}".format(request.auth)
+        resp_dict['access_token'] = token.key
         resp_dict['status_msg'] = 'Login Successful'
         return Response(resp_dict)
     else:

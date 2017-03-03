@@ -5,7 +5,8 @@ from models import Questions, Advices
 from serializers import QuestionSerializer, AdviceSerializer
 from django.db.models import F
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
-
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import permission_classes
 from django.views.decorators.csrf import csrf_exempt
 import json
 
@@ -52,10 +53,15 @@ def delete_question(request, pk, format=None):
             advices_related_to_ques.delete()
         try:
             question_to_delete = Questions.objects.get(pk=pk)
-            question_to_delete.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            if request.user.id == question_to_delete.asked_by_id:
+                question_to_delete.delete()
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            else:
+                resp_dict['error'] = 1
+                resp_dict['err_msg'] = 'Sorry this question was not asked by you'
+                return Response(resp_dict)
         except:
-            return Response(json.dumps(resp_dict))
+            return Response(resp_dict)
 
 
 @api_view(['POST'])
@@ -92,10 +98,17 @@ def update_advice_upvote_count(request, pk, format=None):
 
 @api_view(['DELETE'])
 def delete_advice_question(request, pk):
+    resp_dict = {}
     if request.method == 'DELETE':
         advice_to_delete = Advices.objects.get(pk=pk)
-        advice_to_delete.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        print 'request.user.id: {0}, advised_by: {1}'.format(request.user.id, advice_to_delete.advised_by_id)
+        if request.user.id == advice_to_delete.advised_by_id:
+            advice_to_delete.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            resp_dict['error'] = 1
+            resp_dict['err_msg'] = 'Sorry, this advice was not given by you'
+            return Response(resp_dict)
 
 
 @api_view(['GET', 'POST'])
