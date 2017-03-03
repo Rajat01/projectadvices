@@ -7,6 +7,8 @@ from rest_framework.authtoken.models import Token
 
 
 
+'''This contains all auth related apis'''
+
 
 
 @api_view(['POST'])
@@ -35,11 +37,13 @@ def login_user(request):
     user = authenticate(username=username, password=password)
     if user is not None:
         login(request, user)
-        #response_dict['session_key'] = request.user.username
         resp_dict['access_token'] = request.auth
         resp_dict['status_msg'] = 'Login Successful'
         return Response(resp_dict)
-    return Response(status=status.HTTP_304_NOT_MODIFIED)
+    else:
+        resp_dict['error'] = 1
+        resp_dict['error_message'] = 'User does not exist'
+        return Response(resp_dict)
 
 
 
