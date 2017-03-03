@@ -16,8 +16,8 @@ Including another URLconf
 from django.conf.urls import url, include
 from django.contrib import admin
 from rest_framework.urlpatterns import format_suffix_patterns
-from advicesv1 import views
-
+from advicesv1 import views, api
+from rest_framework.authtoken import views as auth_token_views
 
 
 urlpatterns = [
@@ -30,7 +30,16 @@ urlpatterns = [
     url(r'^docs/', include('rest_framework_docs.urls')),
     url(r'^api/deleteAdvice/(?P<pk>[0-9]+)', views.delete_advice_question),
     url(r'^api/updateQuestionUpvotes', views.update_question_upvote_count),
-    url(r'^api/deleteQuestion/(?P<pk>[0-9]+)', views.delete_question)
+    url(r'^api/deleteQuestion/(?P<pk>[0-9]+)', views.delete_question),
+    url(r'^api/auth/signup', api.sign_up),
+    url(r'api/auth/login', api.login_user),
+    url(r'api/auth/logout', api.logout_user)
 ]
+
+
+urlpatterns += [
+    url(r'^api/token-auth/', auth_token_views.obtain_auth_token)
+]
+
 
 urlpatterns = format_suffix_patterns(urlpatterns)
