@@ -4,11 +4,8 @@ from rest_framework.response import Response
 from models import Questions, Advices
 from serializers import QuestionSerializer, AdviceSerializer
 from django.db.models import F
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import permission_classes
 from django.views.decorators.csrf import csrf_exempt
-import json
+
 
 
 @csrf_exempt
@@ -46,7 +43,6 @@ def update_question_upvote_count(request, format=None):
 @api_view(['DELETE'])
 def delete_question(request, pk, format=None):
     resp_dict = {}
-    resp_dict['msg'] = 'Question does not exist'
     if request.method == 'DELETE':
         advices_related_to_ques = Advices.objects.filter(question_id=pk)
         if advices_related_to_ques:
@@ -61,6 +57,7 @@ def delete_question(request, pk, format=None):
                 resp_dict['err_msg'] = 'Sorry this question was not asked by you'
                 return Response(resp_dict)
         except:
+            resp_dict['msg'] = 'Question does not exist'
             return Response(resp_dict)
 
 

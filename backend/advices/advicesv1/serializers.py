@@ -4,19 +4,15 @@ from django.contrib.auth.models import User
 
 
 class QuestionSerializer(serializers.ModelSerializer):
-    asked_by = serializers.ReadOnlyField(source='asked_by.username')
-
     class Meta:
         model = Questions
         fields = ('id', 'created', 'question', 'up_votes', 'asked_by')
 
 
 class AdviceSerializer(serializers.ModelSerializer):
-    advised_by = serializers.ReadOnlyField(source='advised_by.username')
-
     class Meta:
         model = Advices
-        fields = ('id', 'advice_content', 'question', 'up_votes', 'advised_by')
+        fields = ('id', 'advice_content', 'question_id', 'up_votes', 'advised_by')
 
 
 class QuesUserSerializer(serializers.ModelSerializer):

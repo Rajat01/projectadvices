@@ -18,11 +18,13 @@ def sign_up(request):
     email = request.data.get('email')
     password = request.data.get('password')
     username = request.data.get('username')
+    print "pehele: {0}".format(request.user)
     user_created = User.objects.create_user(username, email, password)
     token = Token.objects.get(user=user_created)
     user = authenticate(username=username, password=password)
     login(request, user)
     resp_dict['access_token'] = token.key
+    resp_dict['user_id'] = request.user.id
     resp_dict['status_msg'] = 'Sign-up Successful'
     return Response(resp_dict, status=status.HTTP_201_CREATED)
 
@@ -39,6 +41,7 @@ def login_user(request):
         token = Token.objects.get(user=user)
         #print "login_user api error {0}".format(request.auth)
         resp_dict['access_token'] = token.key
+        resp_dict['user_id'] = request.user.id
         resp_dict['status_msg'] = 'Login Successful'
         return Response(resp_dict)
     else:

@@ -20,7 +20,7 @@ class Questions(models.Model):
 class Advices(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     advice_content = models.CharField(max_length=1000, blank=True, default='')
-    question = models.ForeignKey(Questions)
+    question_id = models.ForeignKey(Questions, null=True, default=None, db_column='question_id')
     up_votes = models.IntegerField(blank=True, default=0)
 
     advised_by = models.ForeignKey(User, related_name='advice_user', null=True, default=None, on_delete=models.CASCADE)
