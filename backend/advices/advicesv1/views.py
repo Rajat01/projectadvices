@@ -55,9 +55,9 @@ def delete_question(request, pk, format=None):
             else:
                 resp_dict['error'] = 1
                 resp_dict['err_msg'] = 'Sorry this question was not asked by you'
-                return Response(resp_dict)
+                return Response(resp_dict, status=status.HTTP_403_FORBIDDEN)
         except:
-            resp_dict['msg'] = 'Question does not exist'
+            resp_dict['msg'] = 'Questions does not exist'
             return Response(resp_dict)
 
 

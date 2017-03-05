@@ -10,7 +10,6 @@ from django.contrib.auth.models import User
 class Questions(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     question = models.CharField(max_length=1000, blank=True, default='')
-    up_votes = models.IntegerField(blank=True, default=0)
     asked_by = models.ForeignKey(User, related_name='question_user', null=True, default=None, on_delete=models.CASCADE)
 
     def __unicode__(self):
@@ -20,8 +19,7 @@ class Questions(models.Model):
 class Advices(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     advice_content = models.CharField(max_length=1000, blank=True, default='')
-    question_id = models.ForeignKey(Questions, null=True, default=None, db_column='question_id')
-    up_votes = models.IntegerField(blank=True, default=0)
+    question = models.ForeignKey(Questions, related_name='advicesv1_advices', null=True, default=None)
 
     advised_by = models.ForeignKey(User, related_name='advice_user', null=True, default=None, on_delete=models.CASCADE)
 
@@ -30,11 +28,27 @@ class Advices(models.Model):
                                                                        self.question_id)
 
 
+class Vote(models.Model):
+    QUESTION = 'question'
+    ADVICE = 'advice'
+    ENTITY_TYPE_CHOICES = ((QUESTION, 'question'),
+                           (ADVICE, 'advice'))
+    created = models.DateTimeField(auto_now_add=True)
+    advice = models.ForeignKey(Advices, related_name='upvotes_advices', null=True, default=None)
+    question = models.ForeignKey(Questions, related_name='upvotes_questions', null=True, default=None)
+    upvote_count = models.IntegerField(blank=True, default=0)
+    downvote_count = models.IntegerField(blank=True, default=0)
+    entity_type = models.CharField(max_length=10, choices=ENTITY_TYPE_CHOICES, blank=True, default='')
+    upvote_by_user = models.ForeignKey(User, related_name='advicesv1_upvotes', null=True, default=None,
+                                       on_delete=models.CASCADE)
+    downvote_by_user = models.ForeignKey(User, related_name='advicesv1_downvotes', null=True, default=None,
+                                         on_delete=models.CASCADE)
+
+
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_auth_token(sender, instance=None, created=False, **kwargs):
     if created:
         Token.objects.create(user=instance)
-
 
 
 class Stories(models.Model):

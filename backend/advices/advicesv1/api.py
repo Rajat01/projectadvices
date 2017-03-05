@@ -19,7 +19,7 @@ def sign_up(request):
     password = request.data.get('password')
     username = request.data.get('username')
     print "pehele: {0}".format(request.user)
-    user_created = User.objects.create_user(username, email, password)
+    user_created = User.objects.create_user(username, email, password, first_name=first_name, last_name=last_name)
     token = Token.objects.get(user=user_created)
     user = authenticate(username=username, password=password)
     login(request, user)
