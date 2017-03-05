@@ -4,10 +4,9 @@ from rest_framework.response import Response
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from rest_framework.authtoken.models import Token
-from rest_framework.decorators import permission_classes
+from serializers import UserSerializer
 
 '''This contains all auth related apis'''
-
 
 
 @api_view(['POST'])
@@ -29,7 +28,6 @@ def sign_up(request):
     return Response(resp_dict, status=status.HTTP_201_CREATED)
 
 
-
 @api_view(['POST'])
 def login_user(request):
     resp_dict = {}
@@ -39,7 +37,7 @@ def login_user(request):
     if user is not None:
         login(request, user)
         token = Token.objects.get(user=user)
-        #print "login_user api error {0}".format(request.auth)
+        # print "login_user api error {0}".format(request.auth)
         resp_dict['access_token'] = token.key
         resp_dict['user_id'] = request.user.id
         resp_dict['status_msg'] = 'Login Successful'
@@ -50,21 +48,14 @@ def login_user(request):
         return Response(resp_dict)
 
 
+@api_view(['GET'])
+def get_id_user_mapping(request, format=None):
+    user_info = User.objects.all()
+    serializer = UserSerializer(user_info, many=True)
+    return Response(serializer.data)
 
 
 @api_view(['GET'])
 def logout_user(request):
     logout(request)
     return Response(status=status.HTTP_200_OK)
-
-
-
-
-
-
-
-
-
-
-
-
