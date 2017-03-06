@@ -34,7 +34,8 @@ urlpatterns = [
     url(r'^api/auth/signup', api.sign_up),
     url(r'api/auth/login', api.login_user),
     url(r'api/auth/logout', api.logout_user),
-    url(r'api/getIdUserMapping', api.get_id_user_mapping)
+    url(r'api/getIdUserMapping', api.get_id_user_mapping),
+    url(r'api/updateAdviceVoteInfo', vote.update_advice_vote_info)
 ]
 
 

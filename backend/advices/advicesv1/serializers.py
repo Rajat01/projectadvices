@@ -3,6 +3,7 @@ from models import Questions, Advices
 from django.contrib.auth.models import User
 
 
+
 class QuestionSerializer(serializers.ModelSerializer):
     question_id = serializers.IntegerField(source='id', required=False)
 
@@ -18,6 +19,19 @@ class AdviceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Advices
         fields = ('advice_id', 'advice_content', 'question_id', 'advised_by', 'upvote_by', 'downvote_by')
+
+
+class AdviceVoteSerializer(serializers.ModelSerializer):
+    question_id = serializers.PrimaryKeyRelatedField(queryset=Questions.objects.all(), required=False, source='question')
+    advice_id = serializers.IntegerField(source='id', required=False)
+    entity_type = serializers.SerializerMethodField()
+
+    def get_entity_type(self, obj):
+        return obj
+
+    class Meta:
+        model = Advices
+        fields = ('advice_id', 'upvote_by', 'downvote_by', 'entity_type')
 
 
 # class VoteSerializer(serializers.ModelSerializer):

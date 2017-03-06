@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from models import Questions, Advices
 from serializers import QuestionSerializer
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.test import force_authenticate
 
 
 @csrf_exempt
@@ -12,10 +13,12 @@ def create_question(request, format=None):
     if request.method == 'POST':
         serializer = QuestionSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            serializer.save(asked_by=request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                serializer.save(asked_by=request.user)
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
