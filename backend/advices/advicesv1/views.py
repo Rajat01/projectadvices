@@ -27,7 +27,7 @@ def create_question(request, format=None):
                         resp_dict.update(result=serializer.data, message='Success')
                         return Response(resp_dict, status=status.HTTP_201_CREATED)
                     else:
-                        resp_dict.update(message='Please provide is_anonymously_asked flag', error=1)
+                        resp_dict.update(message='Please provide valid is_anonymously_asked flag', error=1)
                         return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
                 else:
                     resp_dict.update(message='Not a valid user', error=1)
@@ -36,6 +36,8 @@ def create_question(request, format=None):
                 print e
                 resp_dict.update(message='Something went wrong', error=1)
                 return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
