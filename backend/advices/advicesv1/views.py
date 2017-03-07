@@ -28,7 +28,7 @@ def create_question(request, format=None):
                         return Response(resp_dict, status=status.HTTP_201_CREATED)
                     else:
                         resp_dict.update(message='Please provide is_anonymously_asked flag', error=1)
-                        return Response(status=status.HTTP_400_BAD_REQUEST)
+                        return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
                 else:
                     resp_dict.update(message='Not a valid user', error=1)
                     return Response(resp_dict, status=status.HTTP_403_FORBIDDEN)
@@ -47,7 +47,7 @@ def get_question_list(request, format=None):
             question = Questions.objects.all()
             serializer = QuestionSerializer(question, many=True)
             resp_dict.update(result=serializer.data)
-            return Response(resp_dict)
+            return Response(resp_dict, status=status.HTTP_200_OK)
         except Exception as e:
             print e
             resp_dict['status_msg'] = "Something went wrong"

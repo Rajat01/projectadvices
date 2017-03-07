@@ -2,18 +2,33 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from models import Questions, Advices
 from serializers import QuestionSerializer, AdviceVoteSerializer
+from rest_framework import status
 
 
 @api_view(['POST'])
 def update_question_upvote_info(request, format=None):
+    resp_dict = dict(message='', error=0, result='')
     if request.method == 'POST':
         request_data = request.data
         question_id = request_data.get('question_id')
-        question_obj = Questions.objects.get(pk=question_id)
-        question_obj.upvote_by.add(request.user)
-        serializer = QuestionSerializer(question_obj)
-        return Response(serializer.data)
-
+        try:
+            if question_id:
+                if not request.user.is_anonymous:
+                    question_obj = Questions.objects.get(pk=question_id)
+                    question_obj.upvote_by.add(request.user)
+                    serializer = QuestionSerializer(question_obj)
+                    resp_dict.update(message='Success', result=serializer.data)
+                    return Response(resp_dict, status=status.HTTP_201_CREATED)
+                else:
+                    resp_dict.update(message='Not a valid user')
+                    return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                resp_dict.update(message='Please provide a valid question_id', error=1)
+                return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            print e
+            resp_dict.update(message='Something went wrong', error=1)
+            return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
