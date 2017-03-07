@@ -9,7 +9,7 @@ class QuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Questions
-        fields = ('question_id', 'created', 'question', 'asked_by', 'upvote_by')
+        fields = ('question_id', 'created', 'question', 'asked_by', 'upvote_by', 'is_anonymously_asked')
 
 
 class AdviceSerializer(serializers.ModelSerializer):

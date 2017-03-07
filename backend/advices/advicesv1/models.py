@@ -12,6 +12,7 @@ class Questions(models.Model):
     question = models.CharField(max_length=1000, blank=True, default='')
     asked_by = models.ForeignKey(User, related_name='question_user', null=True, default=None, on_delete=models.CASCADE)
     upvote_by = models.ManyToManyField(User, default=None, related_name='advicesv1_upvote_question')
+    is_anonymously_asked = models.BooleanField(default=False)
 
     def __unicode__(self):
         return "created: {0} question: {1} asked_by: {2} upvote_by: {3}".format(self.created, self.question,
