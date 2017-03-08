@@ -3,7 +3,6 @@ from models import Questions, Advices
 from django.contrib.auth.models import User
 
 
-
 class QuestionSerializer(serializers.ModelSerializer):
     question_id = serializers.IntegerField(source='id', required=False)
 
@@ -14,7 +13,7 @@ class QuestionSerializer(serializers.ModelSerializer):
 
 class AdviceSerializer(serializers.ModelSerializer):
     question_id = serializers.PrimaryKeyRelatedField(queryset=Questions.objects.all(), required=True, source='question')
-    advice_id = serializers.IntegerField(source='id',required=False)
+    advice_id = serializers.IntegerField(source='id', required=False)
 
     class Meta:
         model = Advices
@@ -22,16 +21,13 @@ class AdviceSerializer(serializers.ModelSerializer):
 
 
 class AdviceVoteSerializer(serializers.ModelSerializer):
-    question_id = serializers.PrimaryKeyRelatedField(queryset=Questions.objects.all(), required=False, source='question')
+    question_id = serializers.PrimaryKeyRelatedField(queryset=Questions.objects.all(), required=False,
+                                                     source='question')
     advice_id = serializers.IntegerField(source='id', required=False)
-    entity_type = serializers.SerializerMethodField()
-
-    def get_entity_type(self, obj):
-        return obj
 
     class Meta:
         model = Advices
-        fields = ('advice_id', 'upvote_by', 'downvote_by', 'entity_type')
+        fields = ('advice_id', 'upvote_by', 'downvote_by', 'question_id')
 
 
 # class VoteSerializer(serializers.ModelSerializer):
@@ -41,7 +37,6 @@ class AdviceVoteSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = User
         fields = ('id', 'first_name')

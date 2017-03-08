@@ -28,8 +28,9 @@ class Advices(models.Model):
     downvote_by = models.ManyToManyField(User, default=None, related_name='advicesv1_downvote_advice')
 
     def __unicode__(self):
-        return "created: {0} advice_content: {1} question: {2}".format(self.created, self.advice_content,
-                                                                       self.question_id)
+        return "created: {0} advice_content: {1} question_id: {2} advised_by: {3} upvote_by: {4} downvote_by: {5}".format(
+            self.created, self.advice_content,
+            self.question_id, self.advised_by, self.upvote_by, self.downvote_by)
 
 
 # class Vote(models.Model):

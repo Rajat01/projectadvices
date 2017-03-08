@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from models import Questions, Advices
 from serializers import QuestionSerializer, AdviceVoteSerializer
 from rest_framework import status
+from django.contrib.auth.models import User
 
 
 @api_view(['POST'])
@@ -34,27 +35,41 @@ def update_question_upvote_info(request, format=None):
 @api_view(['POST'])
 def update_advice_vote_info(request, format=None):
     if request.method == 'POST':
-        resp_dict = {}
+        resp_dict = dict(message='', error=0, result='')
         request_data = request.data
         advice_id = request_data.get('advice_id')
         advice_obj = Advices.objects.get(pk=advice_id)
-        advice_upvote_users = advice_obj.upvote_by.all()
-        advice_downvote_users = advice_obj.downvote_by.all()
-        if request_data.get('entity_type') == 'upvote':
-            if request.user not in advice_downvote_users:
-                advice_obj.upvote_by.add(request.user)
-                resp_dict['status_msg'] = 'Successfully updated upvote user'
-                return Response(resp_dict)
+        advice_upvoted_by = advice_obj.upvote_by.all()
+        advice_downvoted_by = advice_obj.downvote_by.all()
+        if not request.user.is_anonymous:
+            if request_data.get('entity_type') == 'upvote':
+                if request.user not in advice_downvoted_by:
+                    advice_obj.upvote_by.add(request.user)
+                    serializer = AdviceVoteSerializer(advice_obj)
+                    resp_dict.update(message='Successfully updated upvote user', result=serializer.data)
+                    return Response(resp_dict, status=status.HTTP_201_CREATED)
+                else:
+                    advice_obj.downvote_by.remove(request.user)
+                    advice_obj.upvote_by.add(request.user)
+                    serializer = AdviceVoteSerializer(advice_obj)
+                    resp_dict.update(message='Successfully removed from downvote and updated upvote user', result=serializer.data)
+                    return Response(resp_dict, status=status.HTTP_201_CREATED)
+            elif request_data.get('entity_type') == 'downvote':
+                if request.user not in advice_upvoted_by:
+                    advice_obj.downvote_by.add(request.user)
+                    serializer = AdviceVoteSerializer(advice_obj)
+                    resp_dict.update(message='Successfully updated downvote user', result=serializer.data)
+                    return Response(resp_dict, status=status.HTTP_201_CREATED)
+                else:
+                    advice_obj.upvote_by.remove(request.user)
+                    advice_obj.downvote_by.add(request.user)
+                    serializer = AdviceVoteSerializer(advice_obj)
+                    resp_dict.update(message='Successfully removed from upvote and updated downvote user', result=serializer.data)
+                    return Response(resp_dict, status=status.HTTP_201_CREATED)
             else:
-                advice_downvote_users.remove(request.user)
-                advice_obj.upvote_by.add(request.user)
-                resp_dict['status_msg'] = 'Successfully updated upvote and downvote users list'
-                return Response(resp_dict)
-        elif request_data.get('entity_type') == 'downvote':
-            advice_obj.downvote_by.add(request.user)
-            resp_dict['status_msg'] = 'Successfully updated downvote user'
-            return Response(resp_dict)
+                resp_dict['err_msg'] = 'Please provide a valid entity_type'
+                resp_dict['error'] = 1
+                return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
         else:
-            resp_dict['err_msg'] = 'Please provide a valid entity_type'
-            resp_dict['error'] = 1
-            return Response(resp_dict)
+            resp_dict.update(message='Please provide a valid user', error=1)
+            return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
