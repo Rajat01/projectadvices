@@ -30,29 +30,23 @@ class AdviceVoteSerializer(serializers.ModelSerializer):
         fields = ('advice_id', 'upvote_by', 'downvote_by', 'question_id')
 
 
-# class VoteSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Vote
-#         fields = '__all__'
-
-
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'first_name')
 
 
-class QuesUserSerializer(serializers.ModelSerializer):
-    question_user = serializers.PrimaryKeyRelatedField(many=True, queryset=Questions.objects.all())
-
-    class Meta:
-        model = User
-        fields = ('id', 'username', 'question_user')
-
-
-class AdvUserSerializer(serializers.ModelSerializer):
-    advice_user = serializers.PrimaryKeyRelatedField(many=True, queryset=Advices.objects.all())
-
-    class Meta:
-        model = User
-        fields = ('id', 'username', 'advice_user')
+# class QuesUserSerializer(serializers.ModelSerializer):
+#     question_user = serializers.PrimaryKeyRelatedField(many=True, queryset=Questions.objects.all())
+#
+#     class Meta:
+#         model = User
+#         fields = ('id', 'username', 'question_user')
+#
+#
+# class AdvUserSerializer(serializers.ModelSerializer):
+#     advice_user = serializers.PrimaryKeyRelatedField(many=True, queryset=Advices.objects.all())
+#
+#     class Meta:
+#         model = User
+#         fields = ('id', 'username', 'advice_user')

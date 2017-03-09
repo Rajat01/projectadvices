@@ -1,4 +1,3 @@
-from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from models import Advices
@@ -13,20 +12,29 @@ def create_advice(request, format=None):
         request_data = request.data
         print request_data
         serializer = AdviceSerializer(data=request_data)
-        if serializer.is_valid():
-            try:
-                if not request.user.is_anonymous:
-                    serializer.save()
-                    serializer.save(advised_by=request.user)
-                    resp_dict.update(message='Success', result=serializer.data)
-                    return Response(resp_dict, status=status.HTTP_201_CREATED)
-                else:
-                    resp_dict.update(message='Please provide a valid user', error=1)
+        question_id = request_data.get('question_id')
+        question_obj = Advices.objects.filter(question_id=question_id)
+        if question_obj:
+            if serializer.is_valid():
+                try:
+                    if not request.user.is_anonymous:
+                        serializer.save()
+                        serializer.save(advised_by=request.user)
+                        resp_dict.update(message='Success', result=serializer.data)
+                        return Response(resp_dict, status=status.HTTP_201_CREATED)
+                    else:
+                        resp_dict.update(message='Please provide a valid user', error=1)
+                        return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
+                except Exception as e:
+                    print e
+                    resp_dict.update(message='Something went wrong', error=1)
                     return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
-            except Exception as e:
-                print e
-                resp_dict.update(message='Something went wrong', error=1)
+            else:
+                resp_dict.update(message='missing some required fields please check request', error=1)
                 return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            resp_dict.update(message='Please enter a valid question', error=1)
+            return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
