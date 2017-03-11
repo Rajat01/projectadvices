@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'advicesv1.apps.Advicesv1Config',
     'corsheaders',
+    'stories.apps.StoriesConfig',
     'rest_framework_docs',
     'rest_framework.authtoken'
 ]
