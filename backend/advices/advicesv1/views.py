@@ -2,104 +2,83 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from models import Questions, Advices
-from serializers import QuestionSerializer, AdviceSerializer
-from django.db.models import F
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication
-
+from serializers import QuestionSerializer
 from django.views.decorators.csrf import csrf_exempt
-import json
+from rest_framework.test import force_authenticate
 
 
 @csrf_exempt
 @api_view(['POST'])
 def create_question(request, format=None):
+    resp_dict = dict(message='', error=0, result='')
     if request.method == 'POST':
         serializer = QuestionSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            serializer.save(asked_by=request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                if not request.user.is_anonymous:
+                    if request.data.get('is_anonymously_asked') == False:
+                        serializer.save(asked_by=request.user)
+                        serializer.save()
+                        resp_dict.update(result=serializer.data, message='Success')
+                        return Response(resp_dict, status=status.HTTP_201_CREATED)
+                    elif request.data.get('is_anonymously_asked') == True:
+                        serializer.save(asked_by=request.user)
+                        serializer.save()
+                        resp_dict.update(result=serializer.data, message='Success')
+                        return Response(resp_dict, status=status.HTTP_201_CREATED)
+                    else:
+                        resp_dict.update(message='Please provide valid is_anonymously_asked flag', error=1)
+                        return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    resp_dict.update(message='Not a valid user', error=1)
+                    return Response(resp_dict, status=status.HTTP_403_FORBIDDEN)
+            except Exception as e:
+                print e
+                resp_dict.update(message='Something went wrong', error=1)
+                return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
 def get_question_list(request, format=None):
     """List all the questions"""
+    resp_dict = dict(message='', error=0, result='')
     if request.method == 'GET':
-        question = Questions.objects.all()
-        serializer = QuestionSerializer(question, many=True)
-        return Response(serializer.data)
-
-
-@api_view(['POST'])
-def update_question_upvote_count(request, format=None):
-    if request.method == 'POST':
-        request_data = request.data
-        question_id = request_data.get('id')
-        question_obj = Questions.objects.filter(pk=question_id)
-        question_obj.update(up_votes=F('up_votes') + 1)
-        serializer = QuestionSerializer(question_obj, many=True)
-        return Response(serializer.data)
+        try:
+            question = Questions.objects.all()
+            serializer = QuestionSerializer(question, many=True)
+            resp_dict.update(result=serializer.data)
+            return Response(resp_dict, status=status.HTTP_200_OK)
+        except Exception as e:
+            print e
+            resp_dict['status_msg'] = "Something went wrong"
+            resp_dict['error'] = 1
+            return Response(Response, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['DELETE'])
 def delete_question(request, pk, format=None):
-    resp_dict = {}
-    resp_dict['msg'] = 'Question does not exist'
+    resp_dict = dict(message='', error=0, result='')
     if request.method == 'DELETE':
-        advices_related_to_ques = Advices.objects.filter(question_id=pk)
-        if advices_related_to_ques:
-            advices_related_to_ques.delete()
-        try:
-            question_to_delete = Questions.objects.get(pk=pk)
-            question_to_delete.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        except:
-            return Response(json.dumps(resp_dict))
+        if not request.user.is_anonymous:
+            advices_related_to_ques = Advices.objects.filter(question_id=pk)
+            if advices_related_to_ques:
+                advices_related_to_ques.delete()
+            try:
+                question_to_delete = Questions.objects.get(pk=pk)
+                if request.user.id == question_to_delete.asked_by_id:
+                    question_to_delete.delete()
+                    resp_dict.update(message='Successfully deleted')
+                    return Response(status=status.HTTP_204_NO_CONTENT)
+                else:
+                    resp_dict.update(message='Sorry this question was not asked by you', error=1)
+                    return Response(resp_dict, status=status.HTTP_403_FORBIDDEN)
+            except Exception as e:
+                print e
+                resp_dict.update(message='Questions does not exist')
+                return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            resp_dict.update(message='Not a valid user', error=1)
+            return Response(resp_dict, status=status.HTTP_403_FORBIDDEN)
 
-
-@api_view(['POST'])
-def create_advice(request, format=None):
-    if request.method == 'POST':
-        request_data = request.data
-        print request_data
-        serializer = AdviceSerializer(data=request_data)
-        if serializer.is_valid():
-            serializer.save()
-            serializer.save(advised_by=request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-@api_view(['GET'])
-def get_all_advices(request, pk, format=None):
-    if request.method == 'GET':
-        advices = Advices.objects.filter(question_id=pk)
-        serializer = AdviceSerializer(advices, many=True)
-        return Response(serializer.data)
-
-
-@api_view(['POST'])
-def update_advice_upvote_count(request, pk, format=None):
-    if request.method == 'POST':
-        request_data = request.data
-        advice_id = request_data.get('id')
-        advice_obj = Advices.objects.filter(pk=advice_id)
-        advice_obj.update(up_votes=F('up_votes') + 1)
-        serializer = AdviceSerializer(advice_obj, many=True)
-        return Response(serializer.data)
-
-
-@api_view(['DELETE'])
-def delete_advice_question(request, pk):
-    if request.method == 'DELETE':
-        advice_to_delete = Advices.objects.get(pk=pk)
-        advice_to_delete.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-@api_view(['GET', 'POST'])
-def advices_info(request, format=None):
-    pass
-
-# Create your views here.

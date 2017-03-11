@@ -25,7 +25,7 @@ SECRET_KEY = 'i5f6ygc75gsl=c8-ss*sdciv)^-2+pe7%qd%&l#zj_o3t&f67e'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['0.0.0.0', '192.168.0.14', '127.0.0.1']
+ALLOWED_HOSTS = ['0.0.0.0', '192.168.0.14', '127.0.0.1', '10.0.2.2', 'localhost']
 
 
 # Application definition
@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'advicesv1.apps.Advicesv1Config',
     'corsheaders',
+    'stories.apps.StoriesConfig',
     'rest_framework_docs',
     'rest_framework.authtoken'
 ]
