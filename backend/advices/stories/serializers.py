@@ -4,14 +4,23 @@ from django.contrib.auth.models import User
 
 
 class StorySerializer(serializers.ModelSerializer):
+    is_anonymously_posted = serializers.BooleanField(required=True)
+
     class Meta:
         model = Story
-        fields = ('question_id', 'created', 'question', 'asked_by', 'upvote_by', 'is_anonymously_asked')
+        fields = ('story', 'created_by', 'upvoted_by', 'downvoted_by', 'is_anonymously_posted')
+        # fields = '__all__'
+
+
+class StoryPaginationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Story
+        fields = ('story', 'created_by', 'upvoted_by', 'downvoted_by', 'is_anonymously_posted')
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    story_id = serializers.PrimaryKeyRelatedField(source='story', read_only=True, many=True)
+    story_id = serializers.PrimaryKeyRelatedField(queryset=Story.objects.all(), source='story', required=True)
 
     class Meta:
         model = Comment
-        fields = ('advice_id', 'advice_content', 'question_id', 'advised_by', 'upvote_by', 'downvote_by')
+        fields = ('comment', 'story_id', 'commented_by')

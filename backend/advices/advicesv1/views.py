@@ -16,19 +16,10 @@ def create_question(request, format=None):
         if serializer.is_valid():
             try:
                 if not request.user.is_anonymous:
-                    if request.data.get('is_anonymously_asked') == False:
-                        serializer.save(asked_by=request.user)
-                        serializer.save()
-                        resp_dict.update(result=serializer.data, message='Success')
-                        return Response(resp_dict, status=status.HTTP_201_CREATED)
-                    elif request.data.get('is_anonymously_asked') == True:
-                        serializer.save(asked_by=request.user)
-                        serializer.save()
-                        resp_dict.update(result=serializer.data, message='Success')
-                        return Response(resp_dict, status=status.HTTP_201_CREATED)
-                    else:
-                        resp_dict.update(message='Please provide valid is_anonymously_asked flag', error=1)
-                        return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
+                    serializer.save(asked_by=request.user)
+                    serializer.save()
+                    resp_dict.update(result=serializer.data, message='Success')
+                    return Response(resp_dict, status=status.HTTP_201_CREATED)
                 else:
                     resp_dict.update(message='Not a valid user', error=1)
                     return Response(resp_dict, status=status.HTTP_403_FORBIDDEN)
@@ -37,7 +28,7 @@ def create_question(request, format=None):
                 resp_dict.update(message='Something went wrong', error=1)
                 return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
@@ -52,9 +43,8 @@ def get_question_list(request, format=None):
             return Response(resp_dict, status=status.HTTP_200_OK)
         except Exception as e:
             print e
-            resp_dict['status_msg'] = "Something went wrong"
-            resp_dict['error'] = 1
-            return Response(Response, status=status.HTTP_400_BAD_REQUEST)
+            resp_dict.update(message='Something went wrong', error=1)
+            return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['DELETE'])

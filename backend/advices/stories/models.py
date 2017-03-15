@@ -8,8 +8,8 @@ class Story(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     story = models.CharField(max_length=1000, blank=True, default='')
     created_by = models.ForeignKey(User, related_name='stories', null=True, default=None)
-    upvoted_by = models.ManyToManyField(User, null=True, default=None, related_name='upvotes')
-    downvoted_by = models.ManyToManyField(User, null=True, default=None, related_name='downvotes')
+    upvoted_by = models.ManyToManyField(User, default=None, related_name='upvotes')
+    downvoted_by = models.ManyToManyField(User, default=None, related_name='downvotes')
     is_anonymously_posted = models.BooleanField(default=False)
 
     def __unicode__(self):

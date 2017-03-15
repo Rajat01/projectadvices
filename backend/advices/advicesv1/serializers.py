@@ -5,10 +5,19 @@ from django.contrib.auth.models import User
 
 class QuestionSerializer(serializers.ModelSerializer):
     question_id = serializers.IntegerField(source='id', required=False)
+    is_anonymously_asked = serializers.BooleanField(required=True)
 
     class Meta:
         model = Questions
         fields = ('question_id', 'created', 'question', 'asked_by', 'upvote_by', 'is_anonymously_asked')
+
+class QuestionVoteSerializer(serializers.ModelSerializer):
+    question_id = serializers.IntegerField(source='id', required=True)
+
+    class Meta:
+        model = Questions
+        fields = ('question_id', 'question', 'asked_by', 'upvote_by', 'is_anonymously_asked')
+
 
 
 class AdviceSerializer(serializers.ModelSerializer):
