@@ -26,7 +26,7 @@ urlpatterns = [
     url(r'^api/getQuestionList', views.get_question_list),
     url(r'^api/createQuestion', views.create_question),
     url(r'^api/createAdvice', advice.create_advice),
-    url(r'^api/getAllAdvices/(?P<pk>[0-9]+)', advice.get_all_advices),
+    url(r'^api/getAllAdvices/(?P<question_id>[0-9]+)', advice.get_all_advices),
     url(r'^docs/', include('rest_framework_docs.urls')),
     url(r'^api/deleteAdvice/(?P<pk>[0-9]+)', advice.delete_advice_question),
     url(r'^api/updateQuestionUpvotesInfo', vote.update_question_upvote_info),

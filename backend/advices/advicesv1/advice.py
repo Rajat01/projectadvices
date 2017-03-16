@@ -38,17 +38,27 @@ def create_advice(request, format=None):
 
 
 @api_view(['GET'])
-def get_all_advices(request, pk, format=None):
+def get_all_advices(request, question_id, format=None):
     resp_dict = dict(message='', error=0, result='')
     if request.method == 'GET':
-        advices = Advices.objects.filter(question_id=pk)
-        if advices:
-            serializer = AdviceSerializer(advices, many=True)
-            resp_dict.update(message='Success', result=serializer.data)
-            return Response(resp_dict, status=status.HTTP_200_OK)
-        else:
-            resp_dict.update(message='No advices found for this question', error=1)
-            return Response(resp_dict, status=status.HTTP_404_NOT_FOUND)
+        try:
+            params = request.query_params
+            page = int(params.get('page', 1))
+            items_per_page = int(params.get('items_per_page', 5))
+            min_offset = items_per_page * (page - 1)
+            max_offset = items_per_page * page
+            total_advices = Advices.objects.filter(question_id=question_id).count()
+            advices = Advices.objects.filter(question_id=question_id)[min_offset:max_offset]
+            if advices:
+                serializer = AdviceSerializer(advices, many=True)
+                resp_dict.update(message='Success', result=serializer.data, total_advices=total_advices)
+                return Response(resp_dict, status=status.HTTP_200_OK)
+            else:
+                resp_dict.update(message='No advices found for this question', error=1)
+                return Response(resp_dict, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            print e
+            resp_dict.update(message='Something went wrong', error=1)
 
 
 @api_view(['DELETE'])
