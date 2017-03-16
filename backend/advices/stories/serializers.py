@@ -18,6 +18,14 @@ class StoryPaginationSerializer(serializers.ModelSerializer):
         fields = ('story', 'created_by', 'upvoted_by', 'downvoted_by', 'is_anonymously_posted')
 
 
+class StoryVoteSerializer(serializers.ModelSerializer):
+    story_id = serializers.IntegerField(source='id', required=True)
+
+    class Meta:
+        model = Story
+        fields = ('story_id', 'created_by', 'upvoted_by', 'downvoted_by', 'is_anonymously_posted')
+
+
 class CommentSerializer(serializers.ModelSerializer):
     story_id = serializers.PrimaryKeyRelatedField(queryset=Story.objects.all(), source='story', required=True)
 
