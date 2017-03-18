@@ -46,26 +46,32 @@ def get_question_list(request, format=None):
             resp_dict.update(message='Something went wrong', error=1)
             return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['POST'])
+def update_question(request, format=None):
+    resp_dict = dict(message='', error=0, result='')
+    if request.method == 'POST':
+        if not request.user.is_anonymous:
+            pass
+
 
 @api_view(['DELETE'])
 def delete_question(request, pk, format=None):
     resp_dict = dict(message='', error=0, result='')
     if request.method == 'DELETE':
         if not request.user.is_anonymous:
-            advices_related_to_ques = Advices.objects.filter(question_id=pk)
-            if advices_related_to_ques:
-                advices_related_to_ques.delete()
-            try:
-                question_to_delete = Questions.objects.get(pk=pk)
+            question_to_delete = Questions.objects.get(pk=pk)
+            if question_to_delete:
+                advices_related_to_ques = Advices.objects.filter(question_id=pk)
                 if request.user.id == question_to_delete.asked_by_id:
+                    if advices_related_to_ques:
+                        advices_related_to_ques.delete()
                     question_to_delete.delete()
                     resp_dict.update(message='Successfully deleted')
                     return Response(status=status.HTTP_204_NO_CONTENT)
                 else:
                     resp_dict.update(message='Sorry this question was not asked by you', error=1)
                     return Response(resp_dict, status=status.HTTP_403_FORBIDDEN)
-            except Exception as e:
-                print e
+            else:
                 resp_dict.update(message='Questions does not exist')
                 return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
         else:

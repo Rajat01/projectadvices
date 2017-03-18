@@ -1,6 +1,6 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from models import Advices
+from models import Advices, Questions
 from serializers import AdviceSerializer
 from rest_framework import status
 
@@ -13,7 +13,7 @@ def create_advice(request, format=None):
         print request_data
         serializer = AdviceSerializer(data=request_data)
         question_id = request_data.get('question_id')
-        question_obj = Advices.objects.filter(question_id=question_id)
+        question_obj = Questions.objects.get(id=question_id)
         if question_obj:
             if serializer.is_valid():
                 try:
@@ -48,7 +48,7 @@ def get_all_advices(request, question_id, format=None):
             min_offset = items_per_page * (page - 1)
             max_offset = items_per_page * page
             total_advices = Advices.objects.filter(question_id=question_id).count()
-            advices = Advices.objects.filter(question_id=question_id)[min_offset:max_offset]
+            advices = Advices.objects.filter(question_id=question_id).order_by('-id')[min_offset:max_offset]
             if advices:
                 serializer = AdviceSerializer(advices, many=True)
                 resp_dict.update(message='Success', result=serializer.data, total_advices=total_advices)
