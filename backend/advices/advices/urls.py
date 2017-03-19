@@ -23,19 +23,12 @@ from rest_framework.authtoken import views as auth_token_views
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    url(r'^api/getQuestionList', views.get_question_list),
-    url(r'^api/createQuestion', views.create_question),
-    url(r'^api/createAdvice', advice.create_advice),
-    url(r'^api/getAllAdvices/(?P<question_id>[0-9]+)', advice.get_all_advices),
     url(r'^docs/', include('rest_framework_docs.urls')),
-    url(r'^api/deleteAdvice/(?P<pk>[0-9]+)', advice.delete_advice_question),
-    url(r'^api/updateQuestionUpvotesInfo', vote.update_question_upvote_info),
-    url(r'^api/deleteQuestion/(?P<pk>[0-9]+)', views.delete_question),
     url(r'^api/auth/signup', api.sign_up),
     url(r'api/auth/login', api.login_user),
     url(r'api/auth/logout', api.logout_user),
     url(r'api/getIdUserMapping', api.get_id_user_mapping),
-    url(r'api/updateAdviceVoteInfo', vote.update_advice_vote_info),
+    url(r'^advicesv1/', include('advicesv1.urls', namespace='advicesv1')),
     url(r'^stories/', include('stories.urls', namespace='stories'))
 ]
 

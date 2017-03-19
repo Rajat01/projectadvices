@@ -33,6 +33,7 @@ def sign_up(request):
 def login_user(request):
     resp_dict = dict(message='', error=0, result='')
     try:
+        #a = []
         username = request.data.get('username')
         password = request.data.get('password')
         user = authenticate(username=username, password=password)
@@ -40,7 +41,10 @@ def login_user(request):
             login(request, user)
             token = Token.objects.get(user=user)
             # print "login_user api error {0}".format(request.auth)
+            #a.append(dict(access_token=token.key, user_id=request.user.id))
             resp_dict.update(result=dict(access_token=token.key, user_id=request.user.id), message='Login successful')
+            #resp_dict.update(result=a, message='Login successful')
+            print resp_dict
             return Response(resp_dict, status=status.HTTP_200_OK)
         else:
             resp_dict.update(message='User not found', error=1)

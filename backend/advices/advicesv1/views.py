@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from models import Questions, Advices
-from serializers import QuestionSerializer
+from serializers import QuestionSerializer, QuestionVoteSerializer
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.test import force_authenticate
 
@@ -46,12 +46,32 @@ def get_question_list(request, format=None):
             resp_dict.update(message='Something went wrong', error=1)
             return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
 
+
 @api_view(['POST'])
 def update_question(request, format=None):
     resp_dict = dict(message='', error=0, result='')
     if request.method == 'POST':
-        if not request.user.is_anonymous:
-            pass
+        try:
+            if not request.user.is_anonymous:
+                request_data = request.data
+                question_id = request_data.get('question_id', None)
+                question_to_update = Questions.objects.get(pk=question_id)
+                serializer = QuestionVoteSerializer(question_to_update)
+                if request.user.id == question_to_update.asked_by_id:
+                    question_to_update.question = request_data.get('question')
+                    question_to_update.save(update_fields=['question'])
+                    resp_dict.update(result=serializer.data, message='Successfully updated question')
+                    return Response(resp_dict, status=status.HTTP_201_CREATED)
+                else:
+                    resp_dict.update(message='Sorry this question was not asked by you', error=1)
+                    return Response(resp_dict, status=status.HTTP_403_FORBIDDEN)
+            else:
+                resp_dict.update(message='Not a valid user', error=1)
+                return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            print e
+            resp_dict.update(message=str(e), error=1)
+            return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['DELETE'])
@@ -77,4 +97,3 @@ def delete_question(request, pk, format=None):
         else:
             resp_dict.update(message='Not a valid user', error=1)
             return Response(resp_dict, status=status.HTTP_403_FORBIDDEN)
-

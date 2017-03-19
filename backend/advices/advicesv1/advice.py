@@ -1,7 +1,7 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from models import Advices, Questions
-from serializers import AdviceSerializer
+from serializers import AdviceSerializer, AdviceVoteSerializer
 from rest_framework import status
 
 
@@ -14,27 +14,55 @@ def create_advice(request, format=None):
         serializer = AdviceSerializer(data=request_data)
         question_id = request_data.get('question_id')
         question_obj = Questions.objects.get(id=question_id)
-        if question_obj:
-            if serializer.is_valid():
-                try:
+        try:
+            if question_obj:
+                if serializer.is_valid():
                     if not request.user.is_anonymous:
-                        serializer.save()
                         serializer.save(advised_by=request.user)
+                        serializer.save()
                         resp_dict.update(message='Success', result=serializer.data)
                         return Response(resp_dict, status=status.HTTP_201_CREATED)
                     else:
                         resp_dict.update(message='Please provide a valid user', error=1)
                         return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
-                except Exception as e:
-                    print e
-                    resp_dict.update(message='Something went wrong', error=1)
+                else:
+                    resp_dict.update(message='missing some required fields please check request', error=1)
                     return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
             else:
-                resp_dict.update(message='missing some required fields please check request', error=1)
+                resp_dict.update(message='Question does not exist', error=1)
                 return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            resp_dict.update(message='Please enter a valid question', error=1)
+        except Exception as e:
+            print e
+            resp_dict.update(message='Something went wrong', error=1)
             return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+def update_advice(request, format=None):
+    resp_dict = dict(message='', error=0, result='')
+    if request.method == 'POST':
+        try:
+            if not request.user.is_anonymous:
+                request_data = request.data
+                advice_id = request_data.get('advice_id', None)
+                advice_to_update = Advices.objects.get(pk=advice_id)
+                serializer = AdviceVoteSerializer(advice_to_update)
+                if request.user.id == advice_to_update.advised_by_id:
+                    advice_to_update.advice_content = request_data.get('advice_content')
+                    advice_to_update.save(update_fields=['advice_content'])
+                    resp_dict.update(result=serializer.data, message='Successfully updated advice')
+                    return Response(resp_dict, status=status.HTTP_201_CREATED)
+                else:
+                    resp_dict.update(message='Sorry this advice was not given by you', error=1)
+                    return Response(resp_dict, status=status.HTTP_403_FORBIDDEN)
+            else:
+                resp_dict.update(message='Not a valid user', error=1)
+                return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            print e
+            resp_dict.update(message=str(e), error=1)
+            return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 @api_view(['GET'])
