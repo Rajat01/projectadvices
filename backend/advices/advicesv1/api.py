@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from rest_framework.authtoken.models import Token
-from serializers import UserSerializer
+
 
 '''This contains all auth related apis'''
 
@@ -55,11 +55,11 @@ def login_user(request):
 
 
 
-@api_view(['GET'])
-def get_id_user_mapping(request, format=None):
-    user_info = User.objects.all()
-    serializer = UserSerializer(user_info, many=True)
-    return Response(serializer.data)
+# @api_view(['GET'])
+# def get_id_user_mapping(request, format=None):
+#     user_info = User.objects.all()
+#     serializer = UserSerializer(user_info, many=True)
+#     return Response(serializer.data)
 
 
 @api_view(['GET'])

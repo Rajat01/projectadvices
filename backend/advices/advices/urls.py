@@ -16,7 +16,7 @@ Including another URLconf
 from django.conf.urls import url, include
 from django.contrib import admin
 from rest_framework.urlpatterns import format_suffix_patterns
-from advicesv1 import views, api, advice, vote
+from advicesv1 import api
 from rest_framework.authtoken import views as auth_token_views
 
 
@@ -27,7 +27,7 @@ urlpatterns = [
     url(r'^api/auth/signup', api.sign_up),
     url(r'api/auth/login', api.login_user),
     url(r'api/auth/logout', api.logout_user),
-    url(r'api/getIdUserMapping', api.get_id_user_mapping),
+    #url(r'api/getIdUserMapping', api.get_id_user_mapping),
     url(r'^advicesv1/', include('advicesv1.urls', namespace='advicesv1')),
     url(r'^stories/', include('stories.urls', namespace='stories'))
 ]

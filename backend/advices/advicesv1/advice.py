@@ -1,7 +1,7 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from models import Advices, Questions
-from serializers import AdviceSerializer, AdviceVoteSerializer
+from serializers import AdviceSerializer, AdviceVoteSerializer, UserInfoAdviceSerializer
 from rest_framework import status
 
 
@@ -78,7 +78,7 @@ def get_all_advices(request, question_id, format=None):
             total_advices = Advices.objects.filter(question_id=question_id).count()
             advices = Advices.objects.filter(question_id=question_id).order_by('-id')[min_offset:max_offset]
             if advices:
-                serializer = AdviceSerializer(advices, many=True)
+                serializer = UserInfoAdviceSerializer(advices, many=True)
                 resp_dict.update(message='Success', result=serializer.data, total_advices=total_advices)
                 return Response(resp_dict, status=status.HTTP_200_OK)
             else:

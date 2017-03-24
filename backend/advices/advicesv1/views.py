@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from models import Questions, Advices
-from serializers import QuestionSerializer, QuestionVoteSerializer
+from serializers import QuestionSerializer, QuestionVoteSerializer, UserInfoQuestionSerializer
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.test import force_authenticate
 
@@ -38,7 +38,7 @@ def get_question_list(request, format=None):
     if request.method == 'GET':
         try:
             question = Questions.objects.all()
-            serializer = QuestionSerializer(question, many=True)
+            serializer = UserInfoQuestionSerializer(question, many=True)
             resp_dict.update(result=serializer.data)
             return Response(resp_dict, status=status.HTTP_200_OK)
         except Exception as e:
