@@ -1,7 +1,7 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from models import Questions, Advices
-from serializers import QuestionSerializer, AdviceVoteSerializer
+from serializers import QuestionVoteSerializer, AdviceVoteSerializer
 from rest_framework import status
 from django.contrib.auth.models import User
 
@@ -17,7 +17,7 @@ def update_question_upvote_info(request, format=None):
                 if not request.user.is_anonymous:
                     question_obj = Questions.objects.get(pk=question_id)
                     question_obj.upvote_by.add(request.user)
-                    serializer = QuestionSerializer(question_obj)
+                    serializer = QuestionVoteSerializer(question_obj)
                     resp_dict.update(message='Success', result=serializer.data)
                     return Response(resp_dict, status=status.HTTP_201_CREATED)
                 else:
