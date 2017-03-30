@@ -5,38 +5,39 @@ from serializers import AdviceSerializer, AdviceVoteSerializer, UserInfoAdviceSe
 from rest_framework import status
 
 
+# '''Post an advice for a question'''
 @api_view(['POST'])
 def create_advice(request, format=None):
     resp_dict = dict(message='', error=0, result='')
     if request.method == 'POST':
         request_data = request.data
         print request_data
-        serializer = AdviceSerializer(data=request_data)
         question_id = request_data.get('question_id')
-        question_obj = Questions.objects.get(id=question_id)
-        try:
-            if question_obj:
-                if serializer.is_valid():
-                    if not request.user.is_anonymous:
-                        serializer.save(advised_by=request.user)
-                        serializer.save()
-                        resp_dict.update(message='Success', result=serializer.data)
-                        return Response(resp_dict, status=status.HTTP_201_CREATED)
-                    else:
-                        resp_dict.update(message='Please provide a valid user', error=1)
-                        return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
+        serializer = AdviceSerializer(data=request_data)
+        # check if required keys are sent in the request
+        if serializer.is_valid():
+            question_obj = Questions.objects.get(pk=question_id)
+            # check if Auth Token sent in request
+            if not request.user.is_anonymous:
+                # check if the question exists
+                if question_obj:
+                    serializer.save(advised_by=request.user)
+                    serializer.save()
+                    resp_dict.update(message='Success', result=serializer.data)
+                    return Response(resp_dict, status=status.HTTP_201_CREATED)
                 else:
-                    resp_dict.update(message='missing some required fields please check request', error=1)
+                    resp_dict.update(message='Question does not exist', error=1)
                     return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
             else:
-                resp_dict.update(message='Question does not exist', error=1)
+                resp_dict.update(message='Please provide a valid user', error=1)
                 return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            print e
-            resp_dict.update(message='Something went wrong', error=1)
-            return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+#############################################################################################################
+
+# '''Update an existing advice for a question'''
 @api_view(['POST'])
 def update_advice(request, format=None):
     resp_dict = dict(message='', error=0, result='')
@@ -64,7 +65,9 @@ def update_advice(request, format=None):
             return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
 
 
+#############################################################################################################
 
+# '''Get all advices for a question'''
 @api_view(['GET'])
 def get_all_advices(request, question_id, format=None):
     resp_dict = dict(message='', error=0, result='')
@@ -89,6 +92,9 @@ def get_all_advices(request, question_id, format=None):
             resp_dict.update(message='Something went wrong', error=1)
 
 
+################################################################################################################
+
+# '''Delete an advice'''
 @api_view(['DELETE'])
 def delete_advice_question(request, pk):
     resp_dict = dict(message='', error=0, result='')

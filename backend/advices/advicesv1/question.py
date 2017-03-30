@@ -4,9 +4,10 @@ from rest_framework.response import Response
 from models import Questions, Advices
 from serializers import QuestionSerializer, QuestionVoteSerializer, UserInfoQuestionSerializer
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.test import force_authenticate
+from django.core.exceptions import ObjectDoesNotExist
 
 
+# """Create a question"""
 @csrf_exempt
 @api_view(['POST'])
 def create_question(request, format=None):
@@ -14,26 +15,22 @@ def create_question(request, format=None):
     if request.method == 'POST':
         serializer = QuestionSerializer(data=request.data)
         if serializer.is_valid():
-            try:
-                if not request.user.is_anonymous:
-                    serializer.save(asked_by=request.user)
-                    serializer.save()
-                    resp_dict.update(result=serializer.data, message='Success')
-                    return Response(resp_dict, status=status.HTTP_201_CREATED)
-                else:
-                    resp_dict.update(message='Not a valid user', error=1)
-                    return Response(resp_dict, status=status.HTTP_403_FORBIDDEN)
-            except Exception as e:
-                print e
-                resp_dict.update(message='Something went wrong', error=1)
-                return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
+            if not request.user.is_anonymous:
+                serializer.save(asked_by=request.user)
+                serializer.save()
+                resp_dict.update(result=serializer.data, message='Success')
+                return Response(resp_dict, status=status.HTTP_201_CREATED)
+            else:
+                resp_dict.update(message='Not a valid user', error=1)
+                return Response(resp_dict, status=status.HTTP_403_FORBIDDEN)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+##################################################################################################
 
+# """List all the questions"""
 @api_view(['GET'])
 def get_question_list(request, format=None):
-    """List all the questions"""
     resp_dict = dict(message='', error=0, result='')
     if request.method == 'GET':
         try:
@@ -43,16 +40,18 @@ def get_question_list(request, format=None):
             return Response(resp_dict, status=status.HTTP_200_OK)
         except Exception as e:
             print e
-            resp_dict.update(message='Something went wrong', error=1)
+            resp_dict.update(message=str(e), error=1)
             return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
 
+####################################################################################################
 
+# """Update an existing question"""
 @api_view(['POST'])
 def update_question(request, format=None):
     resp_dict = dict(message='', error=0, result='')
     if request.method == 'POST':
-        try:
-            if not request.user.is_anonymous:
+        if not request.user.is_anonymous:
+            try:
                 request_data = request.data
                 question_id = request_data.get('question_id', None)
                 question_to_update = Questions.objects.get(pk=question_id)
@@ -65,34 +64,37 @@ def update_question(request, format=None):
                 else:
                     resp_dict.update(message='Sorry this question was not asked by you', error=1)
                     return Response(resp_dict, status=status.HTTP_403_FORBIDDEN)
-            else:
-                resp_dict.update(message='Not a valid user', error=1)
+            except ObjectDoesNotExist:
+                resp_dict.update(message='Question object not found. Did you provide a valid question_id/question?',
+                                 error=1)
                 return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            print e
-            resp_dict.update(message=str(e), error=1)
+        else:
+            resp_dict.update(message='Not a valid user', error=1)
             return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
 
+########################################################################################################
 
+
+# """Delete a question with user check"""
 @api_view(['DELETE'])
 def delete_question(request, pk, format=None):
     resp_dict = dict(message='', error=0, result='')
     if request.method == 'DELETE':
         if not request.user.is_anonymous:
-            question_to_delete = Questions.objects.get(pk=pk)
-            if question_to_delete:
+            try:
+                question_to_delete = Questions.objects.get(pk=pk)
                 advices_related_to_ques = Advices.objects.filter(question_id=pk)
                 if request.user.id == question_to_delete.asked_by_id:
                     if advices_related_to_ques:
                         advices_related_to_ques.delete()
                     question_to_delete.delete()
                     resp_dict.update(message='Successfully deleted')
-                    return Response(status=status.HTTP_204_NO_CONTENT)
+                    return Response(resp_dict, status=status.HTTP_204_NO_CONTENT)
                 else:
                     resp_dict.update(message='Sorry this question was not asked by you', error=1)
                     return Response(resp_dict, status=status.HTTP_403_FORBIDDEN)
-            else:
-                resp_dict.update(message='Questions does not exist')
+            except ObjectDoesNotExist:
+                resp_dict.update(message='Question object not found. Did you provide a valid id?', error=1)
                 return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
         else:
             resp_dict.update(message='Not a valid user', error=1)

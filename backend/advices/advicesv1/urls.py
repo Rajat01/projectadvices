@@ -1,15 +1,15 @@
 from django.conf.urls import url
 import advice
-import views
+import question
 import vote
 
 #app_name = 'advicesv1'
 urlpatterns = [
     # Question related urls
-    url(r'^api/getQuestionList', views.get_question_list),
-    url(r'^api/createQuestion', views.create_question),
-    url(r'^api/deleteQuestion/(?P<pk>[0-9]+)', views.delete_question),
-    url(r'api/editQuestion', views.update_question),
+    url(r'^api/getQuestionList', question.get_question_list),
+    url(r'^api/createQuestion', question.create_question),
+    url(r'^api/deleteQuestion/(?P<pk>[0-9]+)', question.delete_question),
+    url(r'api/editQuestion', question.update_question),
 
     # Advice related urls
     url(r'^api/createAdvice', advice.create_advice),

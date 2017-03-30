@@ -31,7 +31,7 @@ class QuestionSerializer(serializers.ModelSerializer):
 
 
 class QuestionVoteSerializer(serializers.ModelSerializer):
-    question_id = serializers.IntegerField(source='id', required=False)
+    question_id = serializers.IntegerField(source='id', required=True)
     asked_by = CommonUserSerializer(read_only=True)
     upvote_by = CommonUserSerializer(many=True, read_only=True)
 

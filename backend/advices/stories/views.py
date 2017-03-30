@@ -22,7 +22,7 @@ def post_story(request, format=None):
                     return Response(resp_dict, status=status.HTTP_403_FORBIDDEN)
             except Exception as e:
                 print e
-                resp_dict.update(message='Something went wrong', error=1)
+                resp_dict.update(message=str(e), error=1)
                 return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -44,6 +44,6 @@ def get_stories(request):
             return Response(resp_dict, status=status.HTTP_200_OK)
         except Exception as e:
             print e
-            resp_dict.update(message='Something went wrong', error=1)
+            resp_dict.update(message=str(e), error=1)
             return Response(resp_dict, status=status.HTTP_400_BAD_REQUEST)
 # Create your views here.
